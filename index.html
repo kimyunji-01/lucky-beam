@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>럭키 빔~ 🍀 (Positive Photo Dispenser)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        :root {
+            /* 라이트 모드 (그린 키치) */
+            --main-green: #33691e;
+            --light-green: #dcedc8;
+            --accent-green: #aed581;
+            --bg-color: #f1f8e9;
+            --card-bg: #ffffff;
+            --text-color: #33691e;
+            --sticker-color: #fb5607;
+            --alert-bg: #ffbe0b;
+        }
+
+        [data-theme="dark"] {
+            /* 다크 모드 (딥 그린 & 네온) */
+            --main-green: #aed581;
+            --light-green: #1b5e20;
+            --accent-green: #33691e;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #dcedc8;
+            --sticker-color: #ff006e;
+            --alert-bg: #fb5607;
+        }
+
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--accent-green) 2px, transparent 2px);
+            background-size: 25px 25px;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            z-index: 5;
+        }
+
+        /* 다크 모드 토글 버튼 */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 3px solid #000;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            font-size: 1.5rem;
+            z-index: 100;
+        }
+
+        h1 {
+            background: var(--main-green);
+            color: var(--bg-color);
+            padding: 10px 30px;
+            display: inline-block;
+            transform: rotate(-2deg);
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0 #000;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+        }
+
+        .input-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border: 4px solid #000;
+            box-shadow: 12px 12px 0 var(--accent-green);
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .input-card::before {
+            content: '💬 WRITING...';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #ff006e;
+            color: white;
+            padding: 2px 10px;
+            border: 2px solid #000;
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            border: 3px solid var(--main-green);
+            border-radius: 0;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .photo-card {
+            width: 100%;
+            min-height: 350px;
+            background: var(--card-bg);
+            border: 4px solid #000;
+            box-shadow: 12px 12px 0 var(--main-green);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0.8) rotate(5deg);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .photo-card.active {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-bottom: 4px solid #000;
+        }
+
+        .lucky-msg {
+            padding: 15px;
+            font-size: 1.3rem;
+            color: var(--main-green);
+            background: var(--card-bg);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .lucky-text {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-5deg);
+            color: #ff006e;
+            font-size: 3.5rem;
+            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 클로버 파티클 */
+        .clover {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 999;
+            animation: fall-and-rotate 2s linear forwards;
+        }
+
+        @keyframes fall-and-rotate {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
+        }
+
+        #alertText {
+            display: none;
+            background: var(--alert-bg);
+            color: #000;
+            padding: 5px 20px;
+            border: 2px solid #000;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: blink 0.5s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; } to { opacity: 0.5; }
+        }
+
+        .sticker {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: var(--sticker-color);
+            border-radius: 50%;
+            border: 3px solid #000;
+            top: -30px;
+            right: -30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            transform: rotate(15deg);
+        }
+    </style>
+</head>
+<body>
+
+    <button class="theme-toggle" id="themeToggle">🌞</button>
+
+    <div class="container">
+        <h1>럭키 빔 발사기! 🍀</h1>
+        
+        <div id="alertText">🚨 부정 에너지 감지! 클로버 빔!! 🚨</div>
+
+        <div class="input-card">
+            <div class="sticker">✨</div>
+            <textarea id="userInput" placeholder="지금 기분을 적고 Enter를 눌러보세요..."></textarea>
+        </div>
+
+        <div id="photoCard" class="photo-card">
+            <div class="lucky-text" id="popText" style="display:none;">럭키 빔~ ✨</div>
+            <div id="photoContainer"></div>
+            <div id="luckyMsg" class="lucky-msg"></div>
+        </div>
+    </div>
+
+    <script>
+        const keywords = [
+            '짜증', '슬퍼', '힘들어', '우울', '화나', '죽고', '안돼', '싫어', '별로', '지쳐', '포기', '괴로워', '짱나', '스트레스', '좆같다', '존나', '시발',
+            '킹받', '어이없', '현타', '멘붕', '노답', '노잼', '망했', '탈탈', '극혐', '극딜', '박제', '손절', '박살', '개빡', '킹받네',
+            'ㅠㅠ', 'ㅜㅜ', '하...', '에휴', '망함', '개극혐', '빡치네', '킹받음', '노어이', '피곤해', '지겨워'
+        ];
+        
+        const photoList = [
+            '001377fd1fcee41036d33b78e3ebdf72.jpg', '067d1dfe51e3c730a1955af1eb6046d3.jpg',
+            '0f816685c793964a77029e9b4f746710.jpg', '230fe838a74b41d39ce5fd8fec27672d.jpg',
+            '256d5a2f8bd4bafb137f69790fc7b5c5.jpg', '2bfadd757f62f3ec3c4d9df385eefef8.jpg',
+            '2c31fd6037ff55766a4f96fd1451fe86.jpg', '2f332a901ea1c7b6d5b21bbcc6250227.jpg',
+            '3d6bd0c546a82282916a5a9cfa18d3ec.jpg', '458bc67c3fa3d3720de35f787219931f.jpg',
+            '56fd845a74ae0e049242c74f39fa4b47.jpg', '688fabf7cb2911201d354e292fe42eb3.jpg',
+            '7dddd83180bf288da9c2b0762eaf2e38.jpg', '833e6406591cc11074653accc18fa917.jpg',
+            '8c77f09b41798da462e543e0d0f4d4ea.jpg', '9125092ab794817e8aaf4865a2ff1e84.jpg',
+            'a6025d2766e6e86508e189c95cecb304.jpg', 'a8ff45b84dbe8508fab88877b226ca55.jpg',
+            'd2a48cfaa3e0e92eaeadf49cd3c57054.jpg', 'dba73813c07554ae26c8478c0df28497.jpg',
+            'e3207427c2269d5974d331a319ec1be7.jpg'
+        ];
+
+        const messages = [
+            "오늘의 행운이 당신을 찾아갈 거예요! 🍀",
+            "지금 이 순간, 당신은 최고로 멋져요! ✨",
+            "걱정 마세요, 다 잘 될 거예요. 웃어봐요! 😊",
+            "당신을 위한 긍정 빔 발사! 삐비빅- ⚡",
+            "맛있는 거 먹고 기운 내요! 당신은 소중하니까 🍕",
+            "지나가는 길에 만 원 주울 관상입니다! 💰",
+            "우주가 당신을 돕고 있어요. 힘내요! 🌌"
+        ];
+
+        const input = document.getElementById('userInput');
+        const card = document.getElementById('photoCard');
+        const photoContainer = document.getElementById('photoContainer');
+        const luckyMsg = document.getElementById('luckyMsg');
+        const popText = document.getElementById('popText');
+        const alert = document.getElementById('alertText');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // 다크 모드 토글
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeToggle.innerText = newTheme === 'dark' ? '🌙' : '🌞';
+        });
+
+        // 엔터 키 이벤트
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const val = e.target.value.trim();
+                if (!val) return;
+
+                if (keywords.some(k => val.includes(k))) {
+                    triggerLuckyBeam();
+                    e.target.value = "";
+                }
+            }
+        });
+
+        function triggerLuckyBeam() {
+            // 초기화
+            card.classList.remove('active');
+            popText.style.display = 'none';
+            void card.offsetWidth;
+
+            // 효과음 (귀여운 '뿅' 소리 생성)
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                oscillator.connect(gain);
+                gain.connect(audioCtx.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } catch(e) { console.log('Sound error:', e); }
+
+            // 사진 및 문구 선택
+            const randomPhoto = photoList[Math.floor(Math.random() * photoList.length)];
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+
+            photoContainer.innerHTML = `<img src="./photo/${randomPhoto}" onerror="this.parentElement.innerHTML='이미지 로드 실패 ㅠㅠ'">`;
+            luckyMsg.innerText = randomMsg;
+
+            // 표시
+            card.classList.add('active');
+            popText.style.display = 'block';
+            alert.style.display = 'block';
+
+            // 파티클 생성
+            for(let i=0; i<15; i++) createClover();
+
+            setTimeout(() => { alert.style.display = 'none'; }, 3000);
+        }
+
+        function createClover() {
+            const clover = document.createElement('div');
+            clover.className = 'clover';
+            clover.innerText = '🍀';
+            clover.style.left = Math.random() * 100 + 'vw';
+            clover.style.top = '-50px';
+            clover.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            document.body.appendChild(clover);
+            setTimeout(() => { clover.remove(); }, 2000);
+        }
+    </script>
+</body>
+</html>
